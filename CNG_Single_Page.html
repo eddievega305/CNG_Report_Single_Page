@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CNG Bus Down Report Automator (Single Page)</title>
+  <style>
+    :root{
+      --blue-base:#4EA1FF; --blue-deep:#2C7BE5;
+      --green-base:#37C978; --green-deep:#17A065;
+      --orange-base:#FF9A3E; --orange-deep:#F46A1F;
+      --bg-light:#f9fafb; --bg-dark:#111827; --text-light:#1f2937; --text-dark:#f3f4f6;
+      --card-dark:#1f2937; --card-light:#ffffff;
+      --muted:#6b7280; /* gray-500-ish */
+      --border:#e5e7eb;
+      --shadow:0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1);
+    }
+    /* Base theme */
+    html, body { height: 100%; }
+    body { background: var(--bg-light); color: var(--text-light); font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    .dark body { background: var(--bg-dark); color: var(--text-dark); }
+
+    /* Layout helpers */
+    .container { max-width: 1100px; margin: 0 auto; padding: 1rem; }
+    @media (min-width: 768px){ .container { padding: 2rem; } }
+    .mb-8 { margin-bottom: 2rem; } .mb-4{ margin-bottom: 1rem; } .mb-3{ margin-bottom: .75rem; }
+    .mt-4 { margin-top: 1rem; } .mx-auto{ margin-left:auto; margin-right:auto; } .my-4{ margin-top:1rem; margin-bottom:1rem; }
+    .text-center { text-align: center; }
+    .flex { display: flex; } .hidden{ display: none !important; }
+    .items-center { align-items: center; } .justify-between { justify-content: space-between; } .justify-center { justify-content: center; }
+    .h-16 { height: 4rem; } .w-auto { width: auto; }
+
+    /* Header */
+    h1 { font-size: 1.875rem; line-height: 2.25rem; font-weight: 800; color: #111827; }
+    .dark h1 { color: #ffffff; }
+    .subtitle { font-size: 1rem; color: var(--muted); }
+    .dark .subtitle { color: #d1d5db; }
+
+    /* Grid */
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media (min-width: 768px){ .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+    /* Cards */
+    .card { background: var(--card-light); border-radius: .5rem; padding: 1.5rem; box-shadow: var(--shadow); }
+    .dark .card { background: var(--card-dark); }
+
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; justify-content:center; font-weight:700; border-radius:.5rem; padding:.5rem 1rem; border:none; cursor:pointer; transition: filter .2s ease, transform .08s ease, box-shadow .2s ease; }
+    .btn:hover{ filter:saturate(1.05) brightness(1.03); }
+    .btn:active{ transform: translateY(1px); }
+    .btn-outline { color:#374151; border:1px solid #d1d5db; background: transparent; }
+    .dark .btn-outline { color:#e5e7eb; border-color:#374151; }
+    .btn-secondary { background:#374151; color:#fff; }
+    .btn-purple { background:#7c3aed; color:#fff; }
+    .btn-teal { background:#0d9488; color:#fff; }
+
+    .btn-gloss{position:relative;display:inline-flex;align-items:center;justify-content:center;width:100%;padding:.6rem 1rem;font-weight:700;color:#fff;border-radius:.5rem;transition:transform .08s ease, box-shadow .2s ease, filter .2s ease;box-shadow:0 6px 18px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.25);text-shadow:0 1px 0 rgba(0,0,0,.25);border:none}
+    .btn-gloss::before{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg, rgba(255,255,255,.35) 0%, rgba(255,255,255,.2) 35%, rgba(255,255,255,0) 36%);pointer-events:none}
+    .btn-gloss:hover{filter:saturate(1.05) brightness(1.03);box-shadow:0 8px 22px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.3)}
+    .btn-gloss:active{transform:translateY(1px);box-shadow:0 5px 12px rgba(0,0,0,.2) inset, 0 4px 12px rgba(0,0,0,.25)}
+    .btn-blue{background:linear-gradient(180deg, var(--blue-deep), var(--blue-base))}
+    .btn-green{background:linear-gradient(180deg, var(--green-deep), var(--green-base))}
+    .btn-orange{background:linear-gradient(180deg, var(--orange-deep), var(--orange-base))}
+
+    /* Inputs & textareas */
+    .input-file { width:100%; font-size:.875rem; color:#6b7280; }
+    .textarea { width:100%; height:12rem; padding:.5rem; border:1px solid #d1d5db; border-radius:.5rem; background:#fff; color:#111827; }
+    .dark .textarea { background:#111827; color:#e5e7eb; border-color:#374151; }
+
+    /* Tables */
+    .scroll-x { overflow-x:auto; }
+    .table { width:100%; border-collapse: collapse; }
+    .head { background:#f3f4f6; }
+    .headcell { padding:.5rem; border:1px solid var(--border); text-align:left; font-weight:600; font-size:.9rem; }
+    .cell { padding:.5rem; border:1px solid var(--border); text-align:left; font-size:.9rem; }
+    .zebra-row:nth-child(odd){ background:#ffffff; }
+    .zebra-row:nth-child(even){ background:#f9fafb; }
+    .truncate-cell { max-width: 20rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Section header */
+    .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; }
+    .modal-card { max-width: 40rem; width: 90%; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="mb-8">
+      <div class="flex items-center justify-between">
+        <div class="text-center" style="flex:1">
+          <h1>CNG Bus Down Report Automator</h1>
+        </div>
+        <button id="themeToggle" type="button" class="btn btn-outline">Dark/Light</button>
+      </div>
+      <img src="Logo3.png" alt="Created by Eddie Vega" class="mx-auto my-4 h-16 w-auto" style="max-height:64px"/>
+      <p class="subtitle mt-2 text-center">Streamline your daily reporting process for all DTPW Garages.</p>
+    </header>
+
+    <div class="grid-2 mb-8">
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2 class="mb-3" style="font-size:1.25rem; font-weight:600;">0. Upload Previous Day's Report (CSV or TXT)</h2>
+        <input id="prevFile" type="file" accept=".csv,.txt" class="input-file" />
+        <button id="btnLoadPrev" class="mt-4 btn-gloss btn-orange">Load Previous Report</button>
+      </div>
+      <div class="card">
+        <h2 class="mb-3" style="font-size:1.25rem; font-weight:600;">1. Mimic Board Data</h2>
+        <p style="font-size:.9rem; color:var(--muted);" class="mb-2">Upload the saved Frame Source file OR paste the content below.</p>
+        <input id="mimicFile" type="file" accept=".txt,.html" class="input-file mb-2" />
+        <textarea id="mimicText" class="textarea" placeholder="Paste the 'Frame Source' from the Mimic Board here."></textarea>
+        <button id="btnProcessMimic" class="mt-4 btn-gloss btn-blue">Process Mimic Board Data</button>
+      </div>
+      <div class="card">
+        <h2 class="mb-3" style="font-size:1.25rem; font-weight:600;">2. Available Board Data</h2>
+        <p style="font-size:.9rem; color:var(--muted);" class="mb-2">Upload the saved Page Source file OR paste the content below.</p>
+        <input id="availableFile" type="file" accept=".txt,.html" class="input-file mb-2" />
+        <textarea id="availableText" class="textarea" placeholder="Paste the 'Page Source' from the Available Board here."></textarea>
+        <button id="btnProcessAvailable" class="mt-4 btn-gloss btn-green">Process Available Board Data</button>
+      </div>
+    </div>
+
+    <section class="card mb-8">
+      <div class="section-header">
+        <h2 style="font-size:1.25rem; font-weight:600;">CW - Bus Down Report</h2>
+        <button id="btnExportCw" class="btn btn-purple">Download Active Report CSV</button>
+      </div>
+      <div class="scroll-x">
+        <table class="table" id="cwTable">
+          <thead class="head">
+            <tr>
+              <th class="headcell">Bus Number</th>
+              <th class="headcell">Division</th>
+              <th class="headcell">Failure Notification Date</th>
+              <th class="headcell">Failure Notification Description</th>
+              <th class="headcell">Estimated Completion Date</th>
+              <th class="headcell">Comments/Notes</th>
+            </tr>
+          </thead>
+          <tbody id="cwBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-header">
+        <h2 style="font-size:1.25rem; font-weight:600;">CW - Buses Repaired</h2>
+        <button id="btnExportRepaired" class="btn btn-teal">Download Repaired Report CSV</button>
+      </div>
+      <div class="scroll-x">
+        <table class="table" id="repairedTable">
+          <thead class="head">
+            <tr>
+              <th class="headcell">Bus Number</th>
+              <th class="headcell">Division</th>
+              <th class="headcell">Failure Notification Date</th>
+              <th class="headcell">Failure Notification Description</th>
+              <th class="headcell">Completion Date</th>
+              <th class="headcell">Prev Comments/Notes</th>
+            </tr>
+          </thead>
+          <tbody id="repairedBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal-backdrop hidden flex">
+    <div class="card modal-card">
+      <h3 id="modalTitle" class="mb-2" style="font-size:1.125rem; font-weight:600;">Title</h3>
+      <div id="modalMessage" style="font-size:.95rem;"></div>
+      <div class="mt-4" style="text-align:right"><button id="closeModal" class="btn btn-secondary">Close</button></div>
+    </div>
+  </div>
+
+  <script>
+  // Theme toggle
+  (function(){
+    const root = document.documentElement;
+    const stored = localStorage.getItem('theme')||'dark';
+    if(stored==='dark') root.classList.add('dark'); else root.classList.remove('dark');
+    document.getElementById('themeToggle').addEventListener('click',()=>{
+      const isDark = root.classList.toggle('dark');
+      localStorage.setItem('theme', isDark?'dark':'light');
+    });
+  })();
+
+  // Utils
+  function parseDate(dateStr){
+    if(!dateStr) return null;
+    const s=(dateStr+'').trim();
+    if(!s || s==='--' || /tbd/i.test(s)) return null;
+    const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m){ const month=+m[1], day=+m[2], year=+m[3]; const d=new Date(year,month-1,day); if(d&&d.getFullYear()===year&&d.getMonth()===month-1&&d.getDate()===day) return d; }
+    const d=new Date(s); return isNaN(d.getTime())?null:d;
+  }
+  function formatDate(d){ if(!d||isNaN(d.getTime())) return 'TBD'; const mm=(d.getMonth()+1+'').padStart(2,'0'); const dd=(d.getDate()+'').padStart(2,'0'); return mm+'/'+dd+'/'+d.getFullYear(); }
+  function calculateDaysOut(failureDate){ if(!failureDate||isNaN(failureDate.getTime())) return 0; const today=new Date(); const diff=Math.abs(today.getTime()-failureDate.getTime()); return Math.ceil(diff/(1000*60*60*24))+1; }
+  function calculateRepairDuration(failureDate, completionDate){ if(!failureDate||!completionDate||isNaN(failureDate.getTime())||isNaN(completionDate.getTime())) return 'N/A'; const diff=completionDate.getTime()-failureDate.getTime(); if(diff<0) return 0; const days=Math.ceil(diff/(1000*60*60*24)); return days===0?1:days; }
+
+  // CSV helpers (support multiline quoted rows)
+  function splitCsvRows(text){
+    const rows=[]; let cur=''; let inQ=false; for(let i=0;i<text.length;i++){ const ch=text[i]; if(ch==='\"'){ if(inQ && text[i+1]==='\"'){ cur+='\"'; i++; } else { inQ=!inQ; cur+=ch; } } else if(ch==='\n' && !inQ){ rows.push(cur.trimEnd()); cur=''; } else if(ch==='\r'){ } else { cur+=ch; } } if(cur.length>0) rows.push(cur.trimEnd()); return rows;
+  }
+  function parseCsvLine(line){ const out=[]; let cur=''; let inQ=false; for(let i=0;i<line.length;i++){ const c=line[i]; if(c==='\"'){ if(inQ && line[i+1]==='\"'){ cur+='\"'; i++; } else { inQ=!inQ; } } else if(c===',' && !inQ){ out.push(cur.trim()); cur=''; } else { cur+=c; } } out.push(cur.trim()); return out.map(v=>v.replace(/^"|"$/g,'')); }
+
+  // Models in plain JS
+  let previousReport=[]; // {fleet,busNumber,division,failureDate,description,completionDate,comments,daysOut}
+  let cwReport=[];
+  let repairedReport=[]; // {busNumber,division,failureDate,description,completionDate,previousComments,daysToRepair}
+  let busesMovedInThisRun=[];
+
+  function parsePreviousReport(csvData){
+    const lines=splitCsvRows(csvData.trim());
+    let headerIndex=-1; for(let i=0;i<lines.length;i++){ let clean=lines[i].toLowerCase().replace(/\"/g,'').replace(/\s/g,''); if(clean.charCodeAt(0)===0xFEFF) clean=clean.slice(1); if(clean.includes('fleet') && clean.includes('busnumber') && (clean.includes('division')||clean.includes('dtpwdivision'))) { headerIndex=i; break; } }
+    if(headerIndex===-1) throw new Error('Could not find header row (Fleet,Bus Number,...)');
+    const dataLines=lines.slice(headerIndex+1); const loaded=[];
+    dataLines.forEach(line=>{ if(!line) return; const parts=parseCsvLine(line); if(parts.length<8||!parts[1]) return; let comments=parts[6]||''; if(comments.includes('-')) comments=comments.split('-')[0].trim(); loaded.push({ fleet:parts[0], busNumber:parts[1], division:parts[2], failureDate:parseDate(parts[3]), description:parts[4], completionDate:parseDate(parts[5]), comments, daysOut:parseInt(parts[7],10)||0 }); });
+    if(loaded.length===0) throw new Error('No valid bus data read from the file.');
+    return loaded;
+  }
+
+  function processMimicData(rawData){
+    const parser=new DOMParser(); const doc=parser.parseFromString(rawData,'text/html');
+    if(doc.querySelector('frameset')) throw new Error("Frameset detected. Paste the 'Frame Source'.");
+    const links=doc.querySelectorAll('a[href^="javascript:View_Bus_Status"]'); if(links.length===0) throw new Error('No bus data found.');
+    const currentNumbers=new Set(); cwReport=[]; const moved=[]; repairedReport=[];
+    links.forEach(link=>{
+      const tooltipSpan=link.nextElementSibling; if(!tooltipSpan) return; const tooltipContent=tooltipSpan.innerHTML; if(!tooltipContent) return;
+      const tdoc=parser.parseFromString(tooltipContent,'text/html');
+      const busNumber=tdoc.querySelector('.FontToolTipTitle')?.textContent?.trim(); if(!busNumber) return; const n=parseInt(busNumber,10); if(isNaN(n)||n<18001||n>21188) return; if(currentNumbers.has(busNumber)) return; currentNumbers.add(busNumber);
+      const getVal=(label)=>{ const strongs=tdoc.querySelectorAll('strong'); for(const s of Array.from(strongs)){ if(s.textContent?.trim()===label){ let c=''; let next=s.nextSibling; while(next && next.nodeName!=='STRONG' && next.nodeName!=='BR'){ c+=next.textContent; next=next.nextSibling; } return (c||'').trim(); } } return ''; };
+      const commentsValue=getVal('Comments:'); const nature=getVal('Nature:'); const remarks=getVal('Remarks:'); const description=commentsValue||nature||remarks||'No description available';
+      let failureDateStr=getVal('Failure Date:'); if(!failureDateStr || failureDateStr.trim()==='--'){ failureDateStr=getVal('Last Updated:')||getVal('Maint Last Updated:'); }
+      const failureDate=parseDate(failureDateStr); const estimatedCompletion=parseDate(getVal('Completion Date:'));
+      let comments=getVal('Status Code:'); if(comments.includes('-')) comments=comments.split('-')[0].trim();
+      cwReport.push({ fleet:busNumber.startsWith('192')?'Gillig':'New Flyer', busNumber, division:'CW', failureDate, description, completionDate:estimatedCompletion, comments, daysOut:calculateDaysOut(failureDate) });
+    });
+    if(previousReport.length>0){ previousReport.forEach(oldBus=>{ const oldNum=parseInt(oldBus.busNumber,10); if(isNaN(oldNum)||oldNum<18001||oldNum>21188) return; if(!cwReport.some(b=>b.busNumber===oldBus.busNumber)){ moved.push(oldBus); } }); }
+    busesMovedInThisRun=moved; return { movedCount:moved.length };
+  }
+
+  function processAvailableData(rawData){
+    const parser=new DOMParser(); const doc=parser.parseFromString(rawData,'text/html'); const links=doc.querySelectorAll('a[href^="javascript:View_Bus_Status"]');
+    const availableInfo=new Map();
+    Array.from(links).forEach(link=>{
+      const busNumber=link.textContent?.trim(); if(!busNumber) return; const locationCell=link.parentElement?.nextElementSibling; const location=(locationCell?.textContent||'').trim();
+      let availableDate=null; const span=link.nextElementSibling; if(span?.innerHTML){ const tdoc=new DOMParser().parseFromString(span.innerHTML,'text/html'); const getVal=(label)=>{ const strongs=tdoc.querySelectorAll('strong'); for(const s of Array.from(strongs)){ if(s.textContent?.trim()===label){ let c=''; let next=s.nextSibling; while(next && next.nodeName!=='STRONG' && next.nodeName!=='BR'){ c+=next.textContent||''; next=next.nextSibling; } return c.trim(); } } return ''; }; availableDate=parseDate(getVal('Available Date:')); }
+      availableInfo.set(busNumber,{ location, availableDate });
+    });
+
+    const updated=repairedReport.map(r=>{ const info=availableInfo.get(r.busNumber); if(!info) return r; const nr={...r}; if(info.availableDate){ nr.completionDate=info.availableDate; nr.daysToRepair=calculateRepairDuration(nr.failureDate, info.availableDate); } return nr; });
+
+    const presentSet=new Set(updated.map(b=>b.busNumber)); const prevByBus=new Map(previousReport.map(b=>[b.busNumber,b])); const movedSet=new Set(busesMovedInThisRun.map(b=>b.busNumber));
+    const additions=[]; availableInfo.forEach((info,busNumber)=>{ if(presentSet.has(busNumber)) return; if(!movedSet.has(busNumber)) return; const prev=prevByBus.get(busNumber); if(!prev) return; const completionDate=info.availableDate||null; additions.push({ busNumber:prev.busNumber, division:prev.division, failureDate:prev.failureDate, description:prev.description, completionDate, previousComments:prev.comments||'', daysToRepair: completionDate? calculateRepairDuration(prev.failureDate, completionDate):'N/A' }); });
+
+    repairedReport=[...updated,...additions];
+
+    const confirmed=[...movedSet].filter(b=>availableInfo.has(b));
+    let msg=`Updated ${updated.filter(b=>b.completionDate).length} completion dates.`; if(additions.length>0) msg+=` Added ${additions.length} repaired buses from Available/History.`; msg+='<br><br>'; if(confirmed.length>0) msg+=`<b>Buses confirmed as repaired:</b><br>${confirmed.join(', ')}`; else if(busesMovedInThisRun.length>0) msg+='None of the recently repaired buses were found yet.'; else msg+='No buses were moved from Mimic in this run.';
+    return msg;
+  }
+
+  // Rendering helpers
+  function renderTables(){
+    const cwBody=document.getElementById('cwBody'); cwBody.innerHTML='';
+    [...cwReport].sort((a,b)=> (a.comments||'').localeCompare(b.comments||'') || (parseInt(a.busNumber)-parseInt(b.busNumber))).forEach((bus)=>{
+      const tr=document.createElement('tr'); tr.className='zebra-row';
+      tr.innerHTML=`<td class="cell">${bus.busNumber}</td>
+        <td class="cell">${bus.division}</td>
+        <td class="cell">${formatDate(bus.failureDate)}</td>
+        <td class="cell"><div class="truncate-cell" title="${bus.description}">${bus.description}</div></td>
+        <td class="cell">${formatDate(bus.completionDate)}</td>
+        <td class="cell">${bus.comments||''}</td>`;
+      cwBody.appendChild(tr);
+    });
+
+    const repairedBody=document.getElementById('repairedBody'); repairedBody.innerHTML='';
+    [...repairedReport].sort((a,b)=> (b.completionDate?.getTime()||0)-(a.completionDate?.getTime()||0) || (parseInt(a.busNumber)-parseInt(b.busNumber))).forEach((bus)=>{
+      const tr=document.createElement('tr'); tr.className='zebra-row';
+      tr.innerHTML=`<td class="cell">${bus.busNumber}</td>
+        <td class="cell">${bus.division}</td>
+        <td class="cell">${formatDate(bus.failureDate)}</td>
+        <td class="cell"><div class="truncate-cell" title="${bus.description}">${bus.description}</div></td>
+        <td class="cell">${formatDate(bus.completionDate)}</td>
+        <td class="cell">${bus.previousComments||''}</td>`;
+      repairedBody.appendChild(tr);
+    });
+
+    if(cwReport.length===0){ const tr=document.createElement('tr'); tr.innerHTML=`<td colspan="6" class="cell" style="text-align:center; color:var(--muted); padding:1rem;">No active buses loaded.</td>`; document.getElementById('cwBody').appendChild(tr); }
+    if(repairedReport.length===0){ const tr=document.createElement('tr'); tr.innerHTML=`<td colspan="6" class="cell" style="text-align:center; color:var(--muted); padding:1rem;">Buses moved from the down report will appear here.</td>`; document.getElementById('repairedBody').appendChild(tr); }
+  }
+
+  function downloadCSV(content, filename){ const blob=new Blob([content],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+
+  function exportCw(){ const today=new Date(); const dateStr=formatDate(today); const header='Bus Number,Division,Failure Notification Date,Failure Notification Description,Estimated Completion Date,Comments/Notes\n'; const rows=[...cwReport].sort((a,b)=> (a.comments||'').localeCompare(b.comments||'') || (parseInt(a.busNumber)-parseInt(b.busNumber))).map(b=> [b.busNumber,b.division,formatDate(b.failureDate),'"'+(b.description||'').replace(/"/g,'""')+'"',formatDate(b.completionDate),'"'+(b.comments||'').replace(/"/g,'""')+'"'].join(',')).join('\n'); downloadCSV(header+rows, 'CNG Bus Down Report - CW - '+dateStr+'.csv'); }
+  function exportRepaired(){ const today=new Date(); const dateStr=formatDate(today); const header='Bus Number,Division,Failure Notification Date,Failure Notification Description,Completion Date,Prev Comments/Notes\n'; const rows=[...repairedReport].sort((a,b)=> (b.completionDate?.getTime()||0)-(a.completionDate?.getTime()||0) || (parseInt(a.busNumber)-parseInt(b.busNumber))).map(b=> [b.busNumber,b.division,formatDate(b.failureDate),'"'+(b.description||'').replace(/"/g,'""')+'"',formatDate(b.completionDate),'"'+(b.previousComments||'').replace(/"/g,'""')+'"'].join(',')).join('\n'); downloadCSV(header+rows, 'CNG Buses Repaired - CW - '+dateStr+'.csv'); }
+
+  // Modal helpers
+  function showModal(title, html){ const modal=document.getElementById('modal'); document.getElementById('modalTitle').textContent=title; document.getElementById('modalMessage').innerHTML=html; modal.classList.remove('hidden'); modal.classList.add('flex'); }
+  function closeModal(){ const modal=document.getElementById('modal'); modal.classList.add('hidden'); modal.classList.remove('flex'); }
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+
+  // File helpers
+  function readFile(input, cb){ const f=input.files?.[0]; if(!f) return cb(null); const reader=new FileReader(); reader.onload=(e)=>cb(e.target?.result||''); reader.readAsText(f); }
+
+  // Hook up buttons
+  document.getElementById('btnLoadPrev').addEventListener('click',()=>{
+    const prev=document.getElementById('prevFile'); const file=prev.files?.[0]; if(!file){ showModal('Error','Please select a CSV or TXT file first.'); return; }
+    readFile(prev,(text)=>{ try{ previousReport=parsePreviousReport(text); cwReport=[]; repairedReport=[]; busesMovedInThisRun=[]; renderTables(); showModal('Success',`Loaded and stored ${previousReport.length} buses from your file. The tables have been cleared. Now, process today's Mimic Board data.`); } catch(err){ showModal('Error','Failed to load previous report. '+(err?.message||err)); } });
+  });
+
+  document.getElementById('btnProcessMimic').addEventListener('click',()=>{
+    const input=document.getElementById('mimicFile'); const ta=document.getElementById('mimicText');
+    const go=(text)=>{ try{ const {movedCount}=processMimicData(text||''); renderTables(); showModal('Success',`Processed ${cwReport.length} unique buses in the 18001-21188 range. ${movedCount} buses from the previous report are no longer listed and have been moved to 'Repaired'.`); } catch(err){ showModal('Error','Failed to parse data. '+(err?.message||err)); } };
+    if(input.files?.[0]) readFile(input,go); else go(ta.value);
+  });
+
+  document.getElementById('btnProcessAvailable').addEventListener('click',()=>{
+    const input=document.getElementById('availableFile'); const ta=document.getElementById('availableText');
+    const go=(text)=>{ try{ const msg=processAvailableData(text||''); renderTables(); busesMovedInThisRun=[]; showModal('Available Buses Processed', msg); } catch(err){ showModal('Error','Failed to process available board data. '+(err?.message||err)); } };
+    if(input.files?.[0]) readFile(input,go); else go(ta.value);
+  });
+
+  document.getElementById('btnExportCw').addEventListener('click', exportCw);
+  document.getElementById('btnExportRepaired').addEventListener('click', exportRepaired);
+
+  // Initial empty tables
+  renderTables();
+  </script>
+</body>
+</html>
